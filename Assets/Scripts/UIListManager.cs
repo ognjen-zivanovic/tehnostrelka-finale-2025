@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 public class UIListManager : MonoBehaviour
 {
@@ -31,9 +32,11 @@ public class UIListManager : MonoBehaviour
         }
 
         // Example of populating the item list with sample data (images and text)
-        itemList.Add(new ItemData("Item 1", "This is item 1", Resources.Load<Sprite>("Item1Image")));
-        itemList.Add(new ItemData("Item 2", "This is item 2", Resources.Load<Sprite>("Item2Image")));
-        itemList.Add(new ItemData("Item 3", "This is item 3", Resources.Load<Sprite>("Item3Image")));
+        itemList.Add(new ItemData("Ana Karenjina", "Lav Tolstoj", Resources.Load<Sprite>("1")));
+        itemList.Add(new ItemData("Koreni", "Dobrica Ćosić", Resources.Load<Sprite>("2")));
+        itemList.Add(new ItemData("Majstor i Margarita", "Mihail Bulgakov", Resources.Load<Sprite>("3")));
+        itemList.Add(new ItemData("The Haunter of the Dark", "H.P. Lovecraft", Resources.Load<Sprite>("4")));
+        itemList.Add(new ItemData("The Secret History", "Donna Tartt", Resources.Load<Sprite>("5")));
 
         // Hide the ScrollView and Random button initially by setting them inactive
         if (scrollView != null)
@@ -84,14 +87,20 @@ public class UIListManager : MonoBehaviour
                 if (newItem != null)
                 {
                     // Set the text for the item
-                    Text itemText = newItem.transform.GetChild(0).GetComponent<Text>();
-                    if (itemText != null)
+                    TMP_Text nameText = newItem.transform.GetChild(0).GetComponent<TMP_Text>();
+                    if (nameText != null)
                     {
-                        itemText.text = item.itemText; // Assign item text
+                        nameText.text = item.bookName; // Assign item text
+                    }
+
+                    TMP_Text authorText = newItem.transform.GetChild(1).GetComponent<TMP_Text>();
+                    if (authorText != null)
+                    {
+                        authorText.text = item.authorName; // Assign item text
                     }
 
                     // Set the image for the item
-                    Image itemImage = newItem.transform.GetChild(1).GetComponent<Image>();
+                    Image itemImage = newItem.transform.GetChild(2).GetComponent<Image>();
                     if (itemImage != null && item.itemImage != null)
                     {
                         itemImage.sprite = item.itemImage; // Assign item image
@@ -155,14 +164,14 @@ public class UIListManager : MonoBehaviour
 [System.Serializable]
 public class ItemData
 {
-    public string itemText;
-    public string itemDescription;
+    public string bookName;
+    public string authorName;
     public Sprite itemImage;
 
-    public ItemData(string text, string description, Sprite image)
+    public ItemData(string name, string author, Sprite image)
     {
-        itemText = text;
-        itemDescription = description;
+        bookName = name;
+        authorName = author;
         itemImage = image;
     }
 }
