@@ -99,6 +99,8 @@ public class GetCameraImage : MonoBehaviour
         int width = texture.width;
         int height = texture.height;
 
+        Debug.Log("TEXTURE WIDTH: " + width);
+        Debug.Log("TEXTURE HEIGHT: " + height);
 
         Vector4 cropAmount = cropBoxController.GetCropAmounts();
         int cropX = (int)(cropAmount.z * width);
@@ -131,7 +133,6 @@ public class GetCameraImage : MonoBehaviour
 
         lastTexture = croppedTexture;
 
-        imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(lastTexture, "IMG_20394"));
         rawImage.texture = lastTexture;
 
 
@@ -196,5 +197,7 @@ IMPORTANT: Do not add markers like ```json or any introductory or accompanying t
             "Brief summary: " + responseJson.BriefSummary + "\n" +
             "Genre: " + responseJson.Genre;
         Debug.Log(SetBookINfo.info);
+
+        imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(lastTexture, "IMG_20394"));
     }
 }
