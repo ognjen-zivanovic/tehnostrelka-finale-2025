@@ -104,6 +104,7 @@ public class UIListManager : MonoBehaviour
                     if (itemImage != null && item.itemImage != null)
                     {
                         itemImage.sprite = item.itemImage; // Assign item image
+                        itemImage.preserveAspect = true;
                     }
                 }
             }

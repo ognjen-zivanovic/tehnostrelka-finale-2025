@@ -138,7 +138,7 @@ public class GetCameraImage : MonoBehaviour
     {
         // asking gpt
         var api = new OpenAIClient();
-        string prompt = @"You will be presented with an image of a book cover.  
+        string promptStari = @"You will be presented with an image of a book cover.  
 Your task is to extract the following information from the image if available and display it in **JSON format**.
 
 If the title and/or author can be recognized from the image, feel free to use your knowledge to fill in the remaining information (such as a brief summary and genre).  
@@ -158,6 +158,16 @@ If any field cannot be filled (neither from the image nor from known data), ente
 IMPORTANT: Do not add markers like ```json or any introductory or accompanying text. The output must be **strictly a JSON object**.
 ";
 
+        string prompt = @"Given the image of a book cover, extract or infer the following information and present it in this format:
+Title: [Title of the book]
+Author: [Name of the author]
+Genre: [Primary genre(s) of the book]
+Publication Year: [Year the book was first published]
+Description: [A very short description of the book, based on knowledge or inference]
+Similar Books: [List of similar books, either by the same author or others]
+Notable Awards (if any): [List any major awards the book has won]
+
+If the title and/or author can be recognized from the image, feel free to use your knowledge to fill in the remaining information. Use reasonable assumptions where necessary. Do not omit any fields if there is a basis for making an assumption – even if the information is not directly visible on the cover. Do not include any explanation or commentary – only provide the structured response as listed above.";
         var messages = new List<Message>
         {
             new Message(Role.System, "Vaš zadatak je da iz slike korice knjige izvučete specifične informacije i pružite ih u strukturiranom formatu."),
@@ -180,16 +190,7 @@ IMPORTANT: Do not add markers like ```json or any introductory or accompanying t
         //   }
         // ";
 
-        //Debug.Log(fakeResponseString);
-
-        PromptResponse responseJson = JsonUtility.FromJson<PromptResponse>($"{response.FirstChoice.Message.Content}");
-        //PromptResponse responseJson = JsonUtility.FromJson<PromptResponse>(fakeResponseString);
-        //Debug.Log($"{response.FirstChoice.Message.Content}");
-        Debug.Log(responseJson.Author + " " + responseJson.Title + " " + responseJson.BriefSummary + " " + responseJson.Genre);
-        //SetBookINfo.info = "Title: " + responseJson.Title + "\n" +
-        SetBookINfo.info = "Title: " + responseJson.Title + "\n" + "Author: " + responseJson.Author + "\n" +
-            "Brief summary: " + responseJson.BriefSummary + "\n" +
-            "Genre: " + responseJson.Genre;
+        SetBookINfo.info = $"{response.FirstChoice.Message.Content}";
         Debug.Log(SetBookINfo.info);
 
         imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(lastTexture, "IMG_20394"));
