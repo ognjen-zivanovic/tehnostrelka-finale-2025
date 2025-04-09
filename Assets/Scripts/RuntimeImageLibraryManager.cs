@@ -30,7 +30,7 @@ public class RuntimeImageLibraryManager : MonoBehaviour
             var jobHandle = library.ScheduleAddImageWithValidationJob(
                 runtimeTexture,
                 textureName,
-                null
+                0.2f
             );
 
             while (!jobHandle.jobHandle.IsCompleted)
