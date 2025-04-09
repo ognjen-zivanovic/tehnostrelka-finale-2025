@@ -69,21 +69,18 @@ public class GetCameraImage : MonoBehaviour
         rawTextureData.Dispose();
 
 
-        lastTexture = texture;
 
         int width = texture.width;
         int height = texture.height;
 
-        Debug.Log("WIDTH: " + width + " HEIGHT: " + height);
 
         Vector4 cropAmount = cropBoxController.GetCropAmounts();
-        int cropX = (int)cropAmount.x * width;
-        int cropY = (int)cropAmount.y * height;
+        int cropY = (int)(cropAmount.x * width);
+        int cropX = (int)(cropAmount.z * height);
 
         int newWidth = width - 2 * cropX;
         int newHeight = height - 2 * cropY;
 
-        Debug.Log("NEWWIDTH: " + newWidth + " NEWHEIGHT: " + newHeight);
 
         // Get the pixels from the region
         Color[] pixels = texture.GetPixels(cropX, cropY, newWidth, newHeight);
@@ -92,6 +89,8 @@ public class GetCameraImage : MonoBehaviour
         Texture2D croppedTexture = new Texture2D(newWidth, newHeight, texture.format, false);
         croppedTexture.SetPixels(pixels);
         croppedTexture.Apply();
+
+
 
         // byte[] pngData = croppedTexture.EncodeToPNG();
         // if (pngData != null)
@@ -104,10 +103,10 @@ public class GetCameraImage : MonoBehaviour
         //     Debug.LogError("Failed to encode texture to PNG.");
         // }
 
-        //rawImage.texture = texture;
 
-        // imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(croppedTexture, "uki"));
-
+        imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(croppedTexture, "uki"));
+        rawImage.texture = croppedTexture;
+        lastTexture = croppedTexture;
 
         yield return null;
     }

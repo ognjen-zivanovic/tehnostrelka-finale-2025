@@ -39,6 +39,10 @@ public class RuntimeImageLibraryManager : MonoBehaviour
             jobHandle.jobHandle.Complete();
 
             Debug.Log("Image added to runtime library!");
+
+            imageManager.enabled = false;
+            imageManager.referenceLibrary = library;
+            imageManager.enabled = true;
         }
         else
         {
