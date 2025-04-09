@@ -7,10 +7,10 @@ using UnityEngine.XR.ARSubsystems;
 public class RuntimeImageLibraryManager : MonoBehaviour
 {
     public ARTrackedImageManager imageManager;
-
     void Start()
     {
     }
+
 
     public IEnumerator AddImageAtRuntime(Texture2D runtimeTexture, string textureName)
     {
