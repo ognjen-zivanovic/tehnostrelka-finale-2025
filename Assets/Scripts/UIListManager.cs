@@ -11,6 +11,8 @@ public class UIListManager : MonoBehaviour
     public GameObject scrollView;       // The entire ScrollView (it will toggle visibility)
     public GameObject scrollViewContent; // The Content of the ScrollView (the parent of items)
     public GameObject itemPrefab;       // The prefab for each item in the list
+    public GameObject cropBoxObject;
+    public GameObject scanButton;
 
     // List to store item data
     public List<ItemData> itemList = new List<ItemData>();
@@ -37,6 +39,7 @@ public class UIListManager : MonoBehaviour
         itemList.Add(new ItemData("Majstor i Margarita", "Mihail Bulgakov", Resources.Load<Sprite>("3")));
         itemList.Add(new ItemData("The Haunter of the Dark", "H.P. Lovecraft", Resources.Load<Sprite>("4")));
         itemList.Add(new ItemData("The Secret History", "Donna Tartt", Resources.Load<Sprite>("5")));
+        itemList.Add(new ItemData("Phantom", "Jo Nesbo", Resources.Load<Sprite>("6")));
 
         // Hide the ScrollView and Random button initially by setting them inactive
         if (scrollView != null)
@@ -64,12 +67,16 @@ public class UIListManager : MonoBehaviour
             // If the ScrollView is active, hide it
             scrollView.SetActive(false);
             randomItemButton.gameObject.SetActive(false); // Hide the Random button when ScrollView is hidden
+            cropBoxObject.SetActive(true);
+            scanButton.SetActive(true);
         }
         else
         {
             // If the ScrollView is inactive, show it and populate the list
             scrollView.SetActive(true);
             randomItemButton.gameObject.SetActive(true); // Show the Random button when ScrollView is shown
+            cropBoxObject.SetActive(false);
+            scanButton.SetActive(false);
 
             // Clear previous items in the ScrollView content
             foreach (Transform child in scrollViewContent.transform)
