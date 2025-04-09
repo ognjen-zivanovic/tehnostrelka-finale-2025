@@ -24,14 +24,10 @@ public class PromptResponse
 public class GetCameraImage : MonoBehaviour
 {
     [SerializeField] ARCameraManager cameraManager;
-    [SerializeField] RawImage rawImage;
     [SerializeField] CropBoxController cropBoxController;
 
     Texture2D lastTexture;
-    [SerializeField] TMP_Text infoText;
-
     RuntimeImageLibraryManager imageLibraryManager;
-
 
     void Update()
     {
@@ -133,7 +129,6 @@ public class GetCameraImage : MonoBehaviour
 
         lastTexture = croppedTexture;
 
-        rawImage.texture = lastTexture;
 
 
         yield return null;
@@ -191,7 +186,6 @@ IMPORTANT: Do not add markers like ```json or any introductory or accompanying t
         //PromptResponse responseJson = JsonUtility.FromJson<PromptResponse>(fakeResponseString);
         //Debug.Log($"{response.FirstChoice.Message.Content}");
         Debug.Log(responseJson.Author + " " + responseJson.Title + " " + responseJson.BriefSummary + " " + responseJson.Genre);
-        infoText.text = responseJson.Author + " " + responseJson.Title + " " + responseJson.BriefSummary + " " + responseJson.Genre;
         //SetBookINfo.info = "Title: " + responseJson.Title + "\n" +
         SetBookINfo.info = "Title: " + responseJson.Title + "\n" + "Author: " + responseJson.Author + "\n" +
             "Brief summary: " + responseJson.BriefSummary + "\n" +
