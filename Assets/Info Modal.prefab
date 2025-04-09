@@ -31,7 +31,7 @@ RectTransform:
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 1930395496666946563}
+  - {fileID: 3645392388936121803}
   m_Father: {fileID: 6770566002273960906}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -132,14 +132,13 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 3645392388936121803}
-  m_Father: {fileID: 5177657650725476625}
+  m_Children: []
+  m_Father: {fileID: 3645392388936121803}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 381, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 500, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9178309649168655435
 CanvasRenderer:
@@ -169,17 +168,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Authjosadf: asd
+  m_text: 'Title: Dune
 
-    fa
+    Author: Frank Herbert
 
-    sdf
+    Brief summary: Dune is a science
+    fiction novel set in the distant future amidst a huge interstellar empire. It
+    revolves around the story of Paul Atreides and his noble family''s control of
+    the desert planet Arrakis, which is the universe''s only source of ''spice'',
+    a powerful substance essential for space travel and longevity.
 
-    asdf
-
-    asd
-
-    faskfsldf'
+    Genre: Science
+    Fiction'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -188,8 +188,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4289280512
+  m_fontColor: {r: 0, g: 0.22745098, b: 0.6627451, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 52.798267, y: 55.254974, z: 36.531677, w: 49.993835}
+  m_margin: {x: 38.372433, y: 47.523895, z: 38.716446, w: 137.72356}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -260,7 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
+  m_HorizontalFit: 0
   m_VerticalFit: 2
 --- !u!1 &2387633401242156368
 GameObject:
@@ -337,13 +337,14 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1930395496666946563}
+  m_Children:
+  - {fileID: 1930395496666946563}
+  m_Father: {fileID: 5177657650725476625}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 4, y: 0}
-  m_SizeDelta: {x: -8, y: 0}
+  m_AnchoredPosition: {x: 366.6, y: 0}
+  m_SizeDelta: {x: -500, y: -153.58002}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9183095654552487294
 CanvasRenderer:
@@ -373,7 +374,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: bc4cc582ceaee8830964eb3a5c9bc4a6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 51d69dcffb7a76be493cfebf60c4790b, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
