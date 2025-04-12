@@ -12,6 +12,7 @@ using System.IO;
 using TMPro;
 using System;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 [System.Serializable]
 public class PromptResponse
@@ -33,10 +34,13 @@ public class GetCameraImage : MonoBehaviour
     private UIListManager uIListManager;
     private ArBackgroundBlit arBackgroundBlit;
 
+    public RawImage ril;
+
     void Start()
     {
         uIListManager = GameObject.FindWithTag("UIManager").GetComponent<UIListManager>();
         imageLibraryManager = gameObject.GetComponent<RuntimeImageLibraryManager>();
+        arBackgroundBlit = gameObject.GetComponent<ArBackgroundBlit>();
     }
 
     void Update()
@@ -51,63 +55,37 @@ public class GetCameraImage : MonoBehaviour
         //     StartCoroutine(ProcessImageCPU(image));
         // }
 
-        lastTexture = arBackgroundBlit.BlitARBackgroundToTexture();
+        arBackgroundBlit.BlitARBackgroundToTexture();
 
-        await AskGPT();
-    }
-
-
-    System.Collections.IEnumerator ProcessImageCPU(XRCpuImage image)
-    {
-        var conversionParams = new XRCpuImage.ConversionParams
-        {
-            inputRect = new RectInt(0, 0, image.width, image.height),
-            outputDimensions = new Vector2Int(image.width, image.height),
-            outputFormat = TextureFormat.RGBA32,
-            transformation = XRCpuImage.Transformation.MirrorY
-        };
-
-        // Create buffer
-        var rawTextureData = new NativeArray<byte>(image.GetConvertedDataSize(conversionParams), Allocator.Temp);
-        image.Convert(conversionParams, rawTextureData);
-        image.Dispose();
-
-        // Create texture
-        Texture2D texture = new Texture2D(
-            conversionParams.outputDimensions.x,
-            conversionParams.outputDimensions.y,
-            conversionParams.outputFormat,
-            false);
-        texture.LoadRawTextureData(rawTextureData);
-        texture.Apply();
-        rawTextureData.Dispose();
-
-
-
-        int width = texture.width;
-        int height = texture.height;
-
-        Debug.Log("TEXTURE WIDTH: " + width);
-        Debug.Log("TEXTURE HEIGHT: " + height);
+        int width = arBackgroundBlit.destinationTexture.width;
+        int height = arBackgroundBlit.destinationTexture.height;
+        Debug.Log("BLIT WIDTH: " + width);
+        Debug.Log("BLIT HEIGHT: " + height);
 
         Vector4 cropAmount = cropBoxController.GetCropAmounts();
-        int cropX = (int)(cropAmount.z * width);
-        int cropY = (int)(cropAmount.x * height);
+        int cropX = (int)(cropAmount.x * width);
+        int cropY = (int)(cropAmount.z * height);
+
+        Debug.Log(cropX + " " + cropY);
+        Debug.Log("CROP AMOUNT: " + cropAmount.x + " " + cropAmount.y + " " + cropAmount.z + " " + cropAmount.w);
 
         int newWidth = width - 2 * cropX;
         int newHeight = height - 2 * cropY;
 
+        Debug.Log("NEW WIDTH: " + newWidth);
+        Debug.Log("NEW HEIGHT: " + newHeight);
 
         // Get the pixels from the region
-        Color[] pixels = texture.GetPixels(cropX, cropY, newWidth, newHeight);
+        // Color[] pixels = arBackgroundBlit.destinationTexture.GetPixels(cropX, cropY, newWidth, newHeight);
+        Color[] pixels = arBackgroundBlit.destinationTexture.GetPixels();
 
-        // Create the new texture
-        Texture2D croppedTexture = new Texture2D(newWidth, newHeight, texture.format, false);
+        Debug.Log(arBackgroundBlit.destinationTexture.format);
+
+        Texture2D croppedTexture = new Texture2D(newWidth, newHeight, arBackgroundBlit.destinationTexture.format, false);
         croppedTexture.SetPixels(pixels);
         croppedTexture.Apply();
 
-
-        // byte[] pngData = croppedTexture.EncodeToPNG();
+        // byte[] pngData = arBackgroundBlit.destinationTexture.EncodeToPNG();
         // if (pngData != null)
         // {
         //     File.WriteAllBytes("uki.png", pngData);
@@ -120,11 +98,37 @@ public class GetCameraImage : MonoBehaviour
 
 
         lastTexture = croppedTexture;
-
-
-
-        yield return null;
+        // await AskGPT();
     }
+
+
+    // System.Collections.IEnumerator ProcessImageCPU(XRCpuImage image)
+    // {
+    //     var conversionParams = new XRCpuImage.ConversionParams
+    //     {
+    //         inputRect = new RectInt(0, 0, image.width, image.height),
+    //         outputDimensions = new Vector2Int(image.width, image.height),
+    //         outputFormat = TextureFormat.RGBA32,
+    //         transformation = XRCpuImage.Transformation.MirrorY
+    //     };
+
+    //     // Create buffer
+    //     var rawTextureData = new NativeArray<byte>(image.GetConvertedDataSize(conversionParams), Allocator.Temp);
+    //     image.Convert(conversionParams, rawTextureData);
+    //     image.Dispose();
+
+    //     // Create texture
+    //     Texture2D texture = new Texture2D(
+    //         conversionParams.outputDimensions.x,
+    //         conversionParams.outputDimensions.y,
+    //         conversionParams.outputFormat,
+    //         false);
+    //     texture.LoadRawTextureData(rawTextureData);
+    //     texture.Apply();
+    //     rawTextureData.Dispose();
+
+    //     yield return null;
+    // }
 
     public async Task AskGPT()
     {
@@ -136,11 +140,17 @@ public class GetCameraImage : MonoBehaviour
        Use <b> and </b> for bold text. DO NOT use **. Add a newline between each category.
 
 <b>Title</b>: [Title of the book]
+
 <b>Author</b>: [Name of the author]
+
 <b>Genre</b>: [Primary genre(s) of the book]
+
 <b>Publication Year</b>: [Year the book was first published]
+
 <b>Description</b>: [A very short description of the book, based on knowledge or inference]
+
 <b>Similar Books</b>: [List of similar books, either by the same author or others]
+
 <b>Notable Awards (if any)</b>: [List any major awards the book has won]
 
 If the title and/or author can be recognized from the image, feel free to use your knowledge to fill in the remaining information. Use reasonable assumptions where necessary. Do not omit any fields if there is a basis for making an assumption – even if the information is not directly visible on the cover. Do not include any explanation or commentary – only provide the structured response as listed above.";
