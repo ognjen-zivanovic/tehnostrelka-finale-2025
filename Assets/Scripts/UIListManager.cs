@@ -53,6 +53,13 @@ public class UIListManager : MonoBehaviour
         }
     }
 
+    public void AddItemToList(string name, string author, Sprite image)
+    {
+        // Create a new item and add it to the list
+        ItemData newItem = new ItemData(name, author, image);
+        itemList.Add(newItem);
+    }
+
     void ToggleList()
     {
         if (scrollView == null || scrollViewContent == null || itemPrefab == null)
