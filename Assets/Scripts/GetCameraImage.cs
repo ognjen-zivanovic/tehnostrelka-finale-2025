@@ -76,8 +76,7 @@ public class GetCameraImage : MonoBehaviour
         Debug.Log("NEW HEIGHT: " + newHeight);
 
         // Get the pixels from the region
-        // Color[] pixels = arBackgroundBlit.destinationTexture.GetPixels(cropX, cropY, newWidth, newHeight);
-        Color[] pixels = arBackgroundBlit.destinationTexture.GetPixels();
+        Color[] pixels = arBackgroundBlit.destinationTexture.GetPixels(cropX, cropY, newWidth, newHeight);
 
         Debug.Log(arBackgroundBlit.destinationTexture.format);
 
@@ -85,7 +84,7 @@ public class GetCameraImage : MonoBehaviour
         croppedTexture.SetPixels(pixels);
         croppedTexture.Apply();
 
-        // byte[] pngData = arBackgroundBlit.destinationTexture.EncodeToPNG();
+        //byte[] pngData = croppedTexture.EncodeToPNG();
         // if (pngData != null)
         // {
         //     File.WriteAllBytes("uki.png", pngData);
@@ -98,7 +97,8 @@ public class GetCameraImage : MonoBehaviour
 
 
         lastTexture = croppedTexture;
-        // await AskGPT();
+        ril.texture = lastTexture;
+        await AskGPT();
     }
 
 
@@ -180,18 +180,16 @@ If the title and/or author can be recognized from the image, feel free to use yo
         SetBookINfo.info = responseString;
         Debug.Log(SetBookINfo.info);
 
-        imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(lastTexture, "IMG_20394"));
-
         string patternAuthor = @"<b>Author</b>:\s*(.*?)\n";
         Match matchAuthor = Regex.Match(responseString, patternAuthor);
         if (matchAuthor.Success)
         {
             string author = matchAuthor.Groups[1].Value;
-            Console.WriteLine("Author found: " + author);
+            Debug.Log("Author found: " + author);
         }
         else
         {
-            Console.WriteLine("Author not found.");
+            Debug.Log("Author not found.");
         }
 
         string patternTitle = @"<b>Title</b>:\s*(.*?)\n";
@@ -199,13 +197,16 @@ If the title and/or author can be recognized from the image, feel free to use yo
         if (matchTitle.Success)
         {
             string title = matchTitle.Groups[1].Value;
-            Console.WriteLine("Title found: " + title);
+            Debug.Log("Title found: " + title);
         }
         else
         {
-            Console.WriteLine("Title not found.");
+            Debug.Log("Title not found.");
         }
 
+        imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(lastTexture, "IMG_20394"));
+
         uIListManager.AddItemToList(matchTitle.Groups[1].Value, matchAuthor.Groups[1].Value, Sprite.Create(lastTexture, new Rect(0, 0, lastTexture.width, lastTexture.height), new Vector2(0.5f, 0.5f)));
+        //uIListManager.AddItemToList("testname" + UnityEngine.Random.Range(0, 1000), "test alsdfasdfasf", Sprite.Create(lastTexture, new Rect(0, 0, lastTexture.width, lastTexture.height), new Vector2(0.5f, 0.5f)));
     }
 }
