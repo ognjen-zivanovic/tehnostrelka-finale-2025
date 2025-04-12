@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.IO;
 using TMPro;
 using System;
+using System.Text.RegularExpressions;
 
 [System.Serializable]
 public class PromptResponse
@@ -29,6 +30,8 @@ public class GetCameraImage : MonoBehaviour
     Texture2D lastTexture;
     RuntimeImageLibraryManager imageLibraryManager;
 
+    UIListManager uIListManager;
+
     void Update()
     {
         imageLibraryManager = gameObject.GetComponent<RuntimeImageLibraryManager>();
@@ -36,7 +39,7 @@ public class GetCameraImage : MonoBehaviour
 
     void Start()
     {
-
+        uIListManager = GameObject.FindWithTag("UIManager").GetComponent<UIListManager>();
     }
 
     public async void TakeImage()
@@ -138,34 +141,18 @@ public class GetCameraImage : MonoBehaviour
     {
         // asking gpt
         var api = new OpenAIClient();
-        string promptStari = @"You will be presented with an image of a book cover.  
-Your task is to extract the following information from the image if available and display it in **JSON format**.
-
-If the title and/or author can be recognized from the image, feel free to use your knowledge to fill in the remaining information (such as a brief summary and genre).  
-Do not omit any fields if there is a basis for making an assumption – even if the information is not directly on the image.
-
-The output must be strictly the following JSON object, with no additional markings, text, or formatting:
-
-{
-  ""Title"": ""[Full title of the book]"",
-  ""Author"": ""[Full name of the author]"",
-  ""BriefSummary"": ""[Brief summary of the book in 2–4 sentences, based on the image, text, or known information about the book]"",
-  ""Genre"": ""[Include if it can be reasonably inferred from the title, author, or general knowledge]""
-}
-
-If any field cannot be filled (neither from the image nor from known data), enter ""Unknown"".
-
-IMPORTANT: Do not add markers like ```json or any introductory or accompanying text. The output must be **strictly a JSON object**.
-";
 
         string prompt = @"Given the image of a book cover, extract or infer the following information and present it in this format:
-Title: [Title of the book]
-Author: [Name of the author]
-Genre: [Primary genre(s) of the book]
-Publication Year: [Year the book was first published]
-Description: [A very short description of the book, based on knowledge or inference]
-Similar Books: [List of similar books, either by the same author or others]
-Notable Awards (if any): [List any major awards the book has won]
+
+        You must make the some of the text bold using the html bold tags. Add a newline between every category.
+
+<b>Title</b>: [Title of the book]
+<b>Author</b>: [Name of the author]
+<b>Genre</b>: [Primary genre(s) of the book]
+<b>Publication Year</b>: [Year the book was first published]
+<b>Description</b>: [A very short description of the book, based on knowledge or inference]
+<b>Similar Books</b>: [List of similar books, either by the same author or others]
+<b>Notable Awards (if any)</b>: [List any major awards the book has won]
 
 If the title and/or author can be recognized from the image, feel free to use your knowledge to fill in the remaining information. Use reasonable assumptions where necessary. Do not omit any fields if there is a basis for making an assumption – even if the information is not directly visible on the cover. Do not include any explanation or commentary – only provide the structured response as listed above.";
         var messages = new List<Message>
@@ -190,9 +177,36 @@ If the title and/or author can be recognized from the image, feel free to use yo
         //   }
         // ";
 
-        SetBookINfo.info = $"{response.FirstChoice.Message.Content}";
+        string responseString = $"{response.FirstChoice.Message.Content}";
+        SetBookINfo.info = responseString;
         Debug.Log(SetBookINfo.info);
 
         imageLibraryManager.StartCoroutine(imageLibraryManager.AddImageAtRuntime(lastTexture, "IMG_20394"));
+
+        string patternAuthor = @"<b>Author</b>:\s*(.*?)\n";
+        Match matchAuthor = Regex.Match(responseString, patternAuthor);
+        if (matchAuthor.Success)
+        {
+            string author = matchAuthor.Groups[1].Value;
+            Console.WriteLine("Author found: " + author);
+        }
+        else
+        {
+            Console.WriteLine("Author not found.");
+        }
+
+        string patternTitle = @"<b>Title</b>:\s*(.*?)\n";
+        Match matchTitle = Regex.Match(responseString, patternTitle);
+        if (matchTitle.Success)
+        {
+            string title = matchTitle.Groups[1].Value;
+            Console.WriteLine("Title found: " + title);
+        }
+        else
+        {
+            Console.WriteLine("Title not found.");
+        }
+
+        uIListManager.AddItemToList(matchTitle.Groups[1].Value, matchAuthor.Groups[1].Value, Sprite.Create(lastTexture, new Rect(0, 0, lastTexture.width, lastTexture.height), new Vector2(0.5f, 0.5f)));
     }
 }
