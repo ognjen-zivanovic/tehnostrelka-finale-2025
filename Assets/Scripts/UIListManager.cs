@@ -23,10 +23,19 @@ public class UIListManager : MonoBehaviour
     private List<GameObject> instantiatedItems = new List<GameObject>();
 
     private string saveFilePath;
+    private string imagesFolderPath;
 
     void Start()
     {
         saveFilePath = Path.Combine(Application.persistentDataPath, "itemList.json");
+        imagesFolderPath = Path.Combine(Application.persistentDataPath, "images/");
+        Debug.Log(saveFilePath);
+
+        // Ensure images folder exists
+        if (!Directory.Exists(imagesFolderPath))
+        {
+            Directory.CreateDirectory(imagesFolderPath);
+        }
 
         // Ensure buttons are properly set up
         if (openListButton != null)
@@ -58,9 +67,24 @@ public class UIListManager : MonoBehaviour
     {
         ItemData newItem = new ItemData(name, author, image);
         itemList.Add(newItem);
+        ItemDataSerializable serializableItem = new ItemDataSerializable(newItem);
+        SaveImageToFile(image, serializableItem.imagePath);
         SaveItemList();  // Save the list whenever a new item is added
     }
 
+    void SaveImageToFile(Sprite image, string fileName)
+    {
+        string filePath = Path.Combine(imagesFolderPath, fileName);
+
+        if (File.Exists(filePath))
+        {
+            return; // Image already exists, return existing path
+        }
+
+        // Save the image as PNG
+        byte[] bytes = image.texture.EncodeToPNG();
+        File.WriteAllBytes(filePath, bytes);
+    }
     void ToggleList()
     {
         if (scrollView == null || scrollViewContent == null || itemPrefab == null)
@@ -101,19 +125,19 @@ public class UIListManager : MonoBehaviour
                     TMP_Text nameText = newItem.transform.GetChild(0).GetComponent<TMP_Text>();
                     if (nameText != null)
                     {
-                        nameText.text = item.bookName;
+                        nameText.text = item.bookName + "\n" + item.authorName;
                     }
 
-                    TMP_Text authorText = newItem.transform.GetChild(1).GetComponent<TMP_Text>();
-                    if (authorText != null)
-                    {
-                        authorText.text = item.authorName;
-                    }
+                    // TMP_Text authorText = newItem.transform.GetChild(1).GetComponent<TMP_Text>();
+                    // if (authorText != null)
+                    // {
+                    //     authorText.text = item.authorName;
+                    // }
 
                     Image itemImage = newItem.transform.GetChild(2).GetComponent<Image>();
-                    if (itemImage != null && item.itemImage != null)
+                    if (itemImage != null)
                     {
-                        itemImage.sprite = item.itemImage;
+                        itemImage.sprite = item.bookSprite;
                         itemImage.preserveAspect = true;
                     }
                 }
@@ -187,28 +211,35 @@ public class UIListManager : MonoBehaviour
             itemList.Clear();
             foreach (var serializableItem in wrapper.items)
             {
-                Sprite sprite = LoadSpriteFromBase64(serializableItem.base64Image);
+                Sprite sprite = LoadSpriteFromFile(imagesFolderPath + serializableItem.imagePath);
                 ItemData item = new ItemData(serializableItem.bookName, serializableItem.authorName, sprite);
                 itemList.Add(item);
             }
         }
         else
         {
-            itemList.Add(new ItemData("Ana Karenjina", "Lav Tolstoj", Resources.Load<Sprite>("1")));
-            itemList.Add(new ItemData("Koreni", "Dobrica Ćosić", Resources.Load<Sprite>("2")));
-            itemList.Add(new ItemData("Majstor i Margarita", "Mihail Bulgakov", Resources.Load<Sprite>("3")));
-            itemList.Add(new ItemData("The Haunter of the Dark", "H.P. Lovecraft", Resources.Load<Sprite>("4")));
-            itemList.Add(new ItemData("The Secret History", "Donna Tartt", Resources.Load<Sprite>("5")));
-            itemList.Add(new ItemData("Phantom", "Jo Nesbo", Resources.Load<Sprite>("6")));
+            // Add some default items if no file exists
+            AddItemToList("Phantom", "Jo Nesbo", Resources.Load<Sprite>("6"));
+            AddItemToList("The Secret History", "Donna Tartt", Resources.Load<Sprite>("5"));
+            AddItemToList("The Haunter of the Dark", "H.P. Lovecraft", Resources.Load<Sprite>("4"));
+            AddItemToList("Majstor i Margarita", "Mihail Bulgakov", Resources.Load<Sprite>("3"));
+            AddItemToList("Koreni", "Dobrica Ćosić", Resources.Load<Sprite>("2"));
+            AddItemToList("Ana Karenjina", "Lav Tolstoj", Resources.Load<Sprite>("1"));
         }
     }
 
-    // Convert a base64 string to a Sprite
-    Sprite LoadSpriteFromBase64(string base64String)
+    // Load a sprite from a file path
+    Sprite LoadSpriteFromFile(string filePath)
     {
-        byte[] bytes = System.Convert.FromBase64String(base64String);
+        if (!File.Exists(filePath))
+        {
+            Debug.LogError("Image file not found at path: " + filePath);
+            return null;
+        }
+
+        byte[] imageData = File.ReadAllBytes(filePath);
         Texture2D texture = new Texture2D(2, 2);
-        texture.LoadImage(bytes);
+        texture.LoadImage(imageData);
         return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
     }
 }
@@ -218,13 +249,13 @@ public class ItemData
 {
     public string bookName;
     public string authorName;
-    public Sprite itemImage;
+    public Sprite bookSprite; // Path to the image file
 
-    public ItemData(string name, string author, Sprite image)
+    public ItemData(string name, string author, Sprite sprite)
     {
         bookName = name;
         authorName = author;
-        itemImage = image;
+        this.bookSprite = sprite;
     }
 }
 
@@ -233,21 +264,13 @@ public class ItemDataSerializable
 {
     public string bookName;
     public string authorName;
-    public string base64Image;
+    public string imagePath; // Path to the image file
 
     public ItemDataSerializable(ItemData item)
     {
         bookName = item.bookName;
         authorName = item.authorName;
-        base64Image = ImageToBase64(item.itemImage);
-    }
-
-    // Convert Sprite to base64 string
-    string ImageToBase64(Sprite sprite)
-    {
-        Texture2D texture = sprite.texture;
-        byte[] bytes = texture.EncodeToPNG();
-        return System.Convert.ToBase64String(bytes);
+        imagePath = item.bookName + "_" + item.authorName + ".png";
     }
 }
 
