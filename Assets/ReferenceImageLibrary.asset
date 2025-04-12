@@ -16,14 +16,4 @@ MonoBehaviour:
   m_GuidHigh: 12731920798948165002
   m_DataStore:
     m_Storage: []
-  m_Images:
-  - m_SerializedGuid:
-      m_GuidLow: 5424414719594946653
-      m_GuidHigh: 13343227522245742997
-    m_SerializedTextureGuid:
-      m_GuidLow: 15638263558316917637
-      m_GuidHigh: 12887148200046559706
-    m_Size: {x: 0, y: 0}
-    m_SpecifySize: 0
-    m_Name: IMG_1934
-    m_Texture: {fileID: 0}
+  m_Images: []
