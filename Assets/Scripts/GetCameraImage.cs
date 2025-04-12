@@ -30,45 +30,34 @@ public class GetCameraImage : MonoBehaviour
     Texture2D lastTexture;
     RuntimeImageLibraryManager imageLibraryManager;
 
-    UIListManager uIListManager;
-
-    void Update()
-    {
-        imageLibraryManager = gameObject.GetComponent<RuntimeImageLibraryManager>();
-    }
+    private UIListManager uIListManager;
+    private ArBackgroundBlit arBackgroundBlit;
 
     void Start()
     {
         uIListManager = GameObject.FindWithTag("UIManager").GetComponent<UIListManager>();
+        imageLibraryManager = gameObject.GetComponent<RuntimeImageLibraryManager>();
+    }
+
+    void Update()
+    {
     }
 
     public async void TakeImage()
     {
-        if (cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
-        {
-            // Example: Convert to Text ure2D
-            StartCoroutine(ProcessImage(image));
-        }
+        // if (cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
+        // {
+        //     // Example: Convert to Text ure2D
+        //     StartCoroutine(ProcessImageCPU(image));
+        // }
 
-        LogTextureInfo(lastTexture);
+        lastTexture = arBackgroundBlit.BlitARBackgroundToTexture();
 
         await AskGPT();
     }
 
-    void LogTextureInfo(Texture2D texture)
-    {
-        Debug.Log("Texture Name: " + texture.name);
-        Debug.Log("Texture Width: " + texture.width);
-        Debug.Log("Texture Height: " + texture.height);
-        Debug.Log("Texture Format: " + texture.format);
-        Debug.Log("Texture is Readable: " + texture.isReadable);
-        Debug.Log("Texture Mipmap Enabled: " + (texture.mipmapCount > 1));
-        Debug.Log("Texture Wrap Mode: " + texture.wrapMode);
-        Debug.Log("Texture Filter Mode: " + texture.filterMode);
-        Debug.Log("Texture Aniso Level: " + texture.anisoLevel);
-        Debug.Log("Texture Texel Size: " + texture.texelSize);
-    }
-    System.Collections.IEnumerator ProcessImage(XRCpuImage image)
+
+    System.Collections.IEnumerator ProcessImageCPU(XRCpuImage image)
     {
         var conversionParams = new XRCpuImage.ConversionParams
         {
@@ -144,7 +133,7 @@ public class GetCameraImage : MonoBehaviour
 
         string prompt = @"Given the image of a book cover, extract or infer the following information and present it in this format:
 
-        You must make the some of the text bold using the html bold tags. Add a newline between every category.
+       Use <b> and </b> for bold text. DO NOT use **. Add a newline between each category.
 
 <b>Title</b>: [Title of the book]
 <b>Author</b>: [Name of the author]

@@ -9,11 +9,9 @@ public class ArBackgroundBlit : MonoBehaviour
 
     public RenderTexture m_RenderTexture;
 
-    public Image m_Image;
-
     private Texture2D destinationTexture;
 
-    public void BlitARBackgroundToTexture()
+    public Texture2D BlitARBackgroundToTexture()
     {
         var commandBuffer = new CommandBuffer();
         commandBuffer.name = "AR Camera Background Blit Pass";
@@ -49,11 +47,8 @@ public class ArBackgroundBlit : MonoBehaviour
         destinationTexture = new Texture2D(m_RenderTexture.width, m_RenderTexture.height, TextureFormat.RGBA32, false);
         Graphics.CopyTexture(m_RenderTexture, destinationTexture);
 
-        m_Image.sprite = Sprite.Create(destinationTexture, new Rect(0, 0, destinationTexture.width, destinationTexture.height), new Vector2(0.5f, 0.5f));
-        m_Image.preserveAspect = true;
-
         commandBuffer.Release();
+
+        return destinationTexture;
     }
-
-
 }

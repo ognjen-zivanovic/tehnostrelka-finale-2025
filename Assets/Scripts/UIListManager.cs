@@ -2,62 +2,63 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
+using System.IO;
+using UnityEngine.Serialization;
 
 public class UIListManager : MonoBehaviour
 {
     // References to UI elements
-    public Button openListButton;        // Button to trigger the list
-    public Button randomItemButton;      // Button to select a random item
-    public GameObject scrollView;       // The entire ScrollView (it will toggle visibility)
-    public GameObject scrollViewContent; // The Content of the ScrollView (the parent of items)
-    public GameObject itemPrefab;       // The prefab for each item in the list
+    public Button openListButton;
+    public Button randomItemButton;
+    public GameObject scrollView;
+    public GameObject scrollViewContent;
+    public GameObject itemPrefab;
     public GameObject cropBoxObject;
     public GameObject scanButton;
 
     // List to store item data
     public List<ItemData> itemList = new List<ItemData>();
 
-    // Keep track of the instantiated item GameObjects to highlight them later
+    // Keep track of the instantiated item GameObjects
     private List<GameObject> instantiatedItems = new List<GameObject>();
+
+    private string saveFilePath;
 
     void Start()
     {
-        // Ensure that the buttons are properly set up
+        saveFilePath = Path.Combine(Application.persistentDataPath, "itemList.json");
+
+        // Ensure buttons are properly set up
         if (openListButton != null)
         {
-            openListButton.onClick.AddListener(ToggleList); // Add listener to toggle the list
+            openListButton.onClick.AddListener(ToggleList);
         }
 
         if (randomItemButton != null)
         {
-            randomItemButton.onClick.AddListener(SelectRandomItem); // Add listener to choose random item
+            randomItemButton.onClick.AddListener(SelectRandomItem);
         }
 
-        // Example of populating the item list with sample data (images and text)
-        itemList.Add(new ItemData("Ana Karenjina", "Lav Tolstoj", Resources.Load<Sprite>("1")));
-        itemList.Add(new ItemData("Koreni", "Dobrica Ćosić", Resources.Load<Sprite>("2")));
-        itemList.Add(new ItemData("Majstor i Margarita", "Mihail Bulgakov", Resources.Load<Sprite>("3")));
-        itemList.Add(new ItemData("The Haunter of the Dark", "H.P. Lovecraft", Resources.Load<Sprite>("4")));
-        itemList.Add(new ItemData("The Secret History", "Donna Tartt", Resources.Load<Sprite>("5")));
-        itemList.Add(new ItemData("Phantom", "Jo Nesbo", Resources.Load<Sprite>("6")));
+        // Load previously saved items
+        LoadItemList();
 
-        // Hide the ScrollView and Random button initially by setting them inactive
+        // Hide the ScrollView and Random button initially
         if (scrollView != null)
         {
-            scrollView.SetActive(false); // Hide the ScrollView when the game starts
+            scrollView.SetActive(false);
         }
 
         if (randomItemButton != null)
         {
-            randomItemButton.gameObject.SetActive(false); // Hide the Random button initially
+            randomItemButton.gameObject.SetActive(false);
         }
     }
 
     public void AddItemToList(string name, string author, Sprite image)
     {
-        // Create a new item and add it to the list
         ItemData newItem = new ItemData(name, author, image);
         itemList.Add(newItem);
+        SaveItemList();  // Save the list whenever a new item is added
     }
 
     void ToggleList()
@@ -68,20 +69,17 @@ public class UIListManager : MonoBehaviour
             return;
         }
 
-        // Toggle the visibility of the ScrollView (show or hide it)
         if (scrollView.activeSelf)
         {
-            // If the ScrollView is active, hide it
             scrollView.SetActive(false);
-            randomItemButton.gameObject.SetActive(false); // Hide the Random button when ScrollView is hidden
+            randomItemButton.gameObject.SetActive(false);
             cropBoxObject.SetActive(true);
             scanButton.SetActive(true);
         }
         else
         {
-            // If the ScrollView is inactive, show it and populate the list
             scrollView.SetActive(true);
-            randomItemButton.gameObject.SetActive(true); // Show the Random button when ScrollView is shown
+            randomItemButton.gameObject.SetActive(true);
             cropBoxObject.SetActive(false);
             scanButton.SetActive(false);
 
@@ -92,32 +90,30 @@ public class UIListManager : MonoBehaviour
             }
 
             // Instantiate new items in the ScrollView based on the itemList
-            instantiatedItems.Clear();  // Clear the list of instantiated items to avoid adding them twice
+            instantiatedItems.Clear();
             foreach (var item in itemList)
             {
-                GameObject newItem = Instantiate(itemPrefab, scrollViewContent.transform);  // Instantiate the prefab
-                instantiatedItems.Add(newItem); // Track the instantiated items
+                GameObject newItem = Instantiate(itemPrefab, scrollViewContent.transform);
+                instantiatedItems.Add(newItem);
 
                 if (newItem != null)
                 {
-                    // Set the text for the item
                     TMP_Text nameText = newItem.transform.GetChild(0).GetComponent<TMP_Text>();
                     if (nameText != null)
                     {
-                        nameText.text = item.bookName; // Assign item text
+                        nameText.text = item.bookName;
                     }
 
                     TMP_Text authorText = newItem.transform.GetChild(1).GetComponent<TMP_Text>();
                     if (authorText != null)
                     {
-                        authorText.text = item.authorName; // Assign item text
+                        authorText.text = item.authorName;
                     }
 
-                    // Set the image for the item
                     Image itemImage = newItem.transform.GetChild(2).GetComponent<Image>();
                     if (itemImage != null && item.itemImage != null)
                     {
-                        itemImage.sprite = item.itemImage; // Assign item image
+                        itemImage.sprite = item.itemImage;
                         itemImage.preserveAspect = true;
                     }
                 }
@@ -133,46 +129,87 @@ public class UIListManager : MonoBehaviour
             return;
         }
 
-        // First, reset all items to their normal state (remove highlight)
         foreach (var item in instantiatedItems)
         {
             ResetHighlight(item);
         }
 
-        // Select a random item from the list of instantiated items
         int randomIndex = Random.Range(0, instantiatedItems.Count);
         GameObject selectedItem = instantiatedItems[randomIndex];
-
-        // Highlight the selected item
         HighlightItem(selectedItem);
     }
 
-    // Method to highlight an item (e.g., change background color with transparency)
     void HighlightItem(GameObject item)
     {
         if (item == null) return;
 
-        // Find the highlight Image (child of the item prefab)
         Image highlightImage = item.transform.Find("Highlight").GetComponent<Image>();
         if (highlightImage != null)
         {
-            Color highlightColor = new Color(1f, 1f, 0f, 0.5f); // Yellow with 50% transparency
-            highlightImage.color = highlightColor; // Set the color to yellow with 50% transparency
+            Color highlightColor = new Color(1f, 1f, 0f, 0.5f);
+            highlightImage.color = highlightColor;
         }
     }
 
-    // Method to reset the highlight on an item
     void ResetHighlight(GameObject item)
     {
         if (item == null) return;
 
-        // Find the highlight Image (child of the item prefab)
         Image highlightImage = item.transform.Find("Highlight").GetComponent<Image>();
         if (highlightImage != null)
         {
-            Color defaultColor = new Color(1f, 1f, 1f, 0f); // White with 0% transparency (invisible)
-            highlightImage.color = defaultColor; // Reset to fully transparent
+            Color defaultColor = new Color(1f, 1f, 1f, 0f);
+            highlightImage.color = defaultColor;
         }
+    }
+
+    // Save the itemList to a file in JSON format
+    void SaveItemList()
+    {
+        List<ItemDataSerializable> serializableList = new List<ItemDataSerializable>();
+        foreach (var item in itemList)
+        {
+            serializableList.Add(new ItemDataSerializable(item));
+        }
+
+        string json = JsonUtility.ToJson(new ItemListWrapper { items = serializableList });
+        File.WriteAllText(saveFilePath, json);
+    }
+
+    // Load the itemList from a file
+    void LoadItemList()
+    {
+        if (File.Exists(saveFilePath))
+        {
+            string json = File.ReadAllText(saveFilePath);
+            ItemListWrapper wrapper = JsonUtility.FromJson<ItemListWrapper>(json);
+
+            itemList.Clear();
+            foreach (var serializableItem in wrapper.items)
+            {
+                Sprite sprite = LoadSpriteFromBase64(serializableItem.base64Image);
+                ItemData item = new ItemData(serializableItem.bookName, serializableItem.authorName, sprite);
+                itemList.Add(item);
+            }
+        }
+        else
+        {
+            itemList.Add(new ItemData("Ana Karenjina", "Lav Tolstoj", Resources.Load<Sprite>("1")));
+            itemList.Add(new ItemData("Koreni", "Dobrica Ćosić", Resources.Load<Sprite>("2")));
+            itemList.Add(new ItemData("Majstor i Margarita", "Mihail Bulgakov", Resources.Load<Sprite>("3")));
+            itemList.Add(new ItemData("The Haunter of the Dark", "H.P. Lovecraft", Resources.Load<Sprite>("4")));
+            itemList.Add(new ItemData("The Secret History", "Donna Tartt", Resources.Load<Sprite>("5")));
+            itemList.Add(new ItemData("Phantom", "Jo Nesbo", Resources.Load<Sprite>("6")));
+        }
+    }
+
+    // Convert a base64 string to a Sprite
+    Sprite LoadSpriteFromBase64(string base64String)
+    {
+        byte[] bytes = System.Convert.FromBase64String(base64String);
+        Texture2D texture = new Texture2D(2, 2);
+        texture.LoadImage(bytes);
+        return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
     }
 }
 
@@ -189,4 +226,33 @@ public class ItemData
         authorName = author;
         itemImage = image;
     }
+}
+
+[System.Serializable]
+public class ItemDataSerializable
+{
+    public string bookName;
+    public string authorName;
+    public string base64Image;
+
+    public ItemDataSerializable(ItemData item)
+    {
+        bookName = item.bookName;
+        authorName = item.authorName;
+        base64Image = ImageToBase64(item.itemImage);
+    }
+
+    // Convert Sprite to base64 string
+    string ImageToBase64(Sprite sprite)
+    {
+        Texture2D texture = sprite.texture;
+        byte[] bytes = texture.EncodeToPNG();
+        return System.Convert.ToBase64String(bytes);
+    }
+}
+
+[System.Serializable]
+public class ItemListWrapper
+{
+    public List<ItemDataSerializable> items;
 }
